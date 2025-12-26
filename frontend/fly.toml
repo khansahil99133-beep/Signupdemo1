@@ -1,0 +1,15 @@
+app = "jeetwin-frontend"
+# Update `app` to the actual Fly app name created with `fly launch`, e.g., "jeetwin-frontend".
+
+[build]
+  image = "jeetwin-frontend"
+
+[[services]]
+  internal_port = 80
+  protocol = "tcp"
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+  [[services.ports]]
+    handlers = ["tls", "http"]
+    port = 443

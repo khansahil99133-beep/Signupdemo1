@@ -1,0 +1,61 @@
+name: Fly Deploy & Mirror
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  FRONTEND_DIR: frontend
+  BACKEND_DIR: backend
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Push to GitLab mirror
+        run: |
+          git remote add gitlab https://oauth2:${{ secrets.GITLAB_TOKEN }}@gitlab.com/khan.sahil99133/Signupdemo1.git
+          git push --force gitlab HEAD:main
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+
+  deploy:
+    needs: mirror
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install flyctl
+        run: |
+          curl -L https://fly.io/install.sh | sh
+          echo "${HOME}/.fly/bin" >> $GITHUB_PATH
+
+      - name: Authenticate with Fly
+        run: flyctl auth login --access-token "${{ secrets.FLY_API_TOKEN }}"
+
+      - name: Configure backend secrets
+        run: |
+          flyctl secrets set \
+            ADMIN_USER="${{ secrets.ADMIN_USER }}" \
+            ADMIN_PASS="${{ secrets.ADMIN_PASS }}" \
+            SESSION_COOKIE="${{ secrets.SESSION_COOKIE }}" \
+            DATABASE_URL="${{ secrets.FLY_DATABASE_URL }}" \
+            --app "${{ secrets.FLY_BACKEND_APP }}"
+
+      - name: Deploy frontend to Fly
+        run: |
+          cd $FRONTEND_DIR
+          flyctl deploy --app "${{ secrets.FLY_FRONTEND_APP }}" --config fly.toml --detach
+
+      - name: Deploy backend to Fly
+        run: |
+          cd $BACKEND_DIR
+          flyctl deploy --app "${{ secrets.FLY_BACKEND_APP }}" --config fly.toml --detach
