@@ -16,7 +16,7 @@ pages:
   stage: deploy
   script:
     - mkdir -p public
-    - cp -r index.html success.html styles.css success.css app.js favicon* bcvipx-backgroup_2-pc.b8097c1f.jpg assets public/
+    - cp -r frontend/public/* public/
   artifacts:
     paths:
       - public

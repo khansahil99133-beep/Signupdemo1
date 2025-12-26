@@ -77,6 +77,10 @@ From `backend/`, run `npm test`. The suite spins up an in-memory Postgres instan
 - `docker-compose.yml` spins up both services locally (frontend via the `frontend` Dockerfile, backend via Node 18).
 - See `infrastructure/README.md` for extra deployment notes and the bundled Terraform CLI.
 
+### Published URLs
+- **GitHub Pages** – the new workflow pushes `frontend/public` to `gh-pages`, so the site is reachable at `https://khansahil99133-beep.github.io/Signupdemo1/` after the first successful push to `main`.  
+- **GitLab Pages** – the `pages` job copies `frontend/public` into the archived `public/` artifact. Browse `https://signupdemos.gitlab.io/SignUPDEMOS/` once the main branch pipeline finishes.
+
 ## Data location
 - Users persist in the Postgres `users` table (`backend/db.js` defines the schema).
 - Static files live in `frontend/public/`, and the admin UI is under `backend/public/`.
