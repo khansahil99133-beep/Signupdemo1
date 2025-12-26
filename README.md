@@ -1,93 +1,82 @@
-# SignUPDEMOS
+# Softupkaran - Sign Up Page
+[![pipeline status](https://gitlab.com/signup7230051/signup/badges/main/pipeline.svg)](https://gitlab.com/signup7230051/signup/-/pipelines)
 
+A Netflix-inspired sign-up experience built with plaintext HTML/CSS/JS, packaged behind Nginx for the frontend and complemented by a lightweight Express backend that persists users in Postgres.
 
+## Repository layout
+- `frontend/public/` ƒ?" static pages (`index.html`, `success.html`), styles (`styles.css`, `success.css`), the client script (`app.js`), favicons, and supporting assets. `frontend/Dockerfile` plus `frontend/nginx.conf` serve these files when the frontend is built or served via Docker/Compose.
+- `backend/` ƒ?" Express API implementation, data helpers, admin UI, and scripts for migrating/importing users.
+- `infrastructure/` ƒ?" Terraform binary bundle plus the README that explains how the Render deployment is wired (`render.yaml` stays at the repo root and references the services described here).
 
-## Getting started
+## Running locally
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
-
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-* [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
-
+### Docker Compose (recommended)
+```bash
+docker compose up --build
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/signupdemos/SignUPDEMOS.git
-git branch -M main
-git push -uf origin main
+This command builds the Nginx-based frontend (`frontend/`) and the Node backend (`backend/`). The frontend listens on `localhost:8080`, while the API/Express server runs on `localhost:5050` by default.
+
+### Frontend-only
+- Serve `frontend/public/` with any static server (e.g., `npx http-server frontend/public -p 8080` or a new Docker/Render deployment that points to that path).
+- The inline script in `frontend/public/index.html` sets `window.__API_BASE__` (`https://signup-2wle.onrender.com` by default) before `app.js` loads. Change that value or inject a `<script>` tag to target a different API host (e.g., `https://api.example.com`).
+
+### Backend
+```bash
+cd backend
+npm install
+npm run start   # listens on http://localhost:5050
+```
+Set the required environment variables before running the backend:
+```bash
+export ADMIN_USER="admin"
+export ADMIN_PASS="change-me"
+export SESSION_COOKIE="admin_session"
 ```
 
-## Integrate with your tools
+## Backend API
+- `POST /api/signup` ƒ?" accepts `{ name, email, password, whatsapp, telegram }`, hashes the password, and persists the user.
+- `GET /api/users` ƒ?" admin-only endpoint that returns every user (requires the admin session cookie).
+- `GET /api/export?format=csv` ƒ?" admin-only CSV export of the users table (only the `csv` format is supported).
+- `/admin` ƒ?" protected admin UI (login required via `POST /admin/login`).
+- `GET /api/health` ƒ?" readiness probe for deployment platforms.
 
-* [Set up project integrations](https://gitlab.com/signupdemos/SignUPDEMOS/-/settings/integrations)
+## Database
+The backend persists data in Postgres. Provide `DATABASE_URL` (or the individual `PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`, `PGPORT` values) before starting the service; the default credentials used during development are `postgres:postgres`. `SESSION_TTL_SEC` controls the session lifetime (default `3600` seconds).
 
-## Collaborate with your team
+### Deploying with Neon
+- Replace the Postgres instance by setting `DATABASE_URL="postgresql://username:secret@xyz.neon.tech/mydb"`.
+- Update Render (via `render.yaml` or the dashboard) with that `DATABASE_URL` plus the admin/ session variables so the deployed `softupkaran-backend` connects to Neon.
+- Allow Renderƒ?Ts outbound IPs (or choose ƒ?oAllow all trafficƒ??) in Neonƒ?Ts networking panel so the service can reach the database.
+- On first start, `ensureSchema()` in `backend/db.js` creates the `users` table automatically.
 
-* [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+### Migrating existing users
+If your legacy data lives in another Postgres instance, run the migration script:
+```bash
+cd backend
+SOURCE_DATABASE_URL="postgresql://old-host/softupkaran" \
+DATABASE_URL="postgresql://username:secret@xyz.neon.tech/mydb" \
+npx node scripts/migrate-to-neon.js
+```
+The script copies `public.users` rows, respects `id`, and preserves `created_at`.
 
-## Test and Deploy
+### Importing from `users.json`
+If you have a `backend/data/users.json` export:
+```bash
+cd backend
+DATABASE_URL="postgresql://username:secret@xyz.neon.tech/mydb" \
+npx node scripts/import-users-json.js
+```
+The importer hashes each `password`/`password_hash` and upserts them into `public.users`. You may also provide a custom `users-*.json` path as the first argument if you exported the file elsewhere.
 
-Use the built-in continuous integration in GitLab.
+## Testing
+From `backend/`, run `npm test`. The suite spins up an in-memory Postgres instance via `pg-mem` and exercises signup, admin auth, export, and delete flows.
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+## Deployment
+- The frontend is designed to be a static Render `static` service (`render.yaml` adds `softupkaran-frontend` pointing to `frontend/public`).
+- The backend stays a Node heap (`softupkaran-backend`) configured in the same `render.yaml`.
+- `docker-compose.yml` spins up both services locally (frontend via the `frontend` Dockerfile, backend via Node 18).
+- See `infrastructure/README.md` for extra deployment notes and the bundled Terraform CLI.
 
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+## Data location
+- Users persist in the Postgres `users` table (`backend/db.js` defines the schema).
+- Static files live in `frontend/public/`, and the admin UI is under `backend/public/`.
