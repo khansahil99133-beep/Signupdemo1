@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Crick6 - Sign Up</title>
+    <meta name="description" content="Create your Crick6 account." />
+    <link rel="preload" href="styles.css" as="style" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-crick6.png?v=3" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-crick6.png?v=3" />
+    <link rel="shortcut icon" href="/favicon-crick6.png?v=3" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon-crick6.png?v=3" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=3" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="billboard" aria-hidden="true"></section>
+      <header class="brand">
+        <div class="brand-inner">
+          <span class="logo">Crick6</span>
+        </div>
+      </header>
+
+      <section class="panel" role="region" aria-label="Sign up">
+        <div class="panel-glow" aria-hidden="true"></div>
+        <div class="panel-orbits" aria-hidden="true"></div>
+        <form id="signupForm" class="card" novalidate>
+          <h1 class="title">Sign Up</h1>
+
+          <div class="input-group" style="--delay: 80ms;">
+            <label for="name">Username</label>
+            <input type="text" id="name" name="name" placeholder="Your username" autocomplete="username" required />
+            <p class="error" data-error-for="name"></p>
+          </div>
+
+          <div class="input-group" style="--delay: 140ms;">
+            <label for="email">Email (optional)</label>
+            <input type="email" id="email" name="email" placeholder="your@email.com" autocomplete="email" />
+            <p class="error" data-error-for="email"></p>
+          </div>
+
+          <div class="input-group" style="--delay: 200ms;">
+            <label for="mobile">Mobile number</label>
+            <input type="tel" id="mobile" name="mobile" placeholder="+91 555 555 5555" autocomplete="tel" />
+            <p class="error" data-error-for="mobile"></p>
+          </div>
+
+          <div class="input-group" style="--delay: 260ms;">
+            <label for="whatsapp">WhatsApp number</label>
+            <input type="text" id="whatsapp" name="whatsapp" placeholder="+91 555 555 5555" autocomplete="tel" />
+            <p class="error" data-error-for="whatsapp"></p>
+          </div>
+
+          <div class="input-group" style="--delay: 320ms;">
+            <label for="telegram">Your Telegram Username</label>
+            <input type="text" id="telegram" name="telegram" placeholder="@yourusername" autocomplete="username" required />
+            <p class="error" data-error-for="telegram"></p>
+          </div>
+
+          <div class="input-group password-group" style="--delay: 380ms;">
+            <label for="password">Create password</label>
+            <div class="password-wrap">
+              <input type="password" id="password" name="password" placeholder="At least 8 characters" minlength="8" autocomplete="new-password" required />
+              <button type="button" class="toggle" data-target="password" aria-pressed="false" aria-label="Show password">Show</button>
+            </div>
+            <p class="error" data-error-for="password"></p>
+          </div>
+
+          <div class="input-group password-group" style="--delay: 440ms;">
+            <label for="confirmPassword">Re-enter password</label>
+            <div class="password-wrap">
+              <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-enter password" minlength="8" autocomplete="new-password" required />
+              <button type="button" class="toggle" data-target="confirmPassword" aria-pressed="false" aria-label="Show password">Show</button>
+            </div>
+            <p class="error" data-error-for="confirmPassword"></p>
+          </div>
+
+          <button class="primary" type="submit" style="--delay: 500ms;">Create account</button>
+
+          <p class="meta" style="--delay: 560ms;">
+            Already on Crick6? <a href="https://www.crick6.com/" id="goToSignIn">Sign in</a>
+          </p>
+
+        </form>
+      </section>
+
+      <footer class="site-footer">
+        <div class="footer-inner">
+          </div>
+      </footer>
+    </main>
+
+    <script>
+      window.__API_BASE__ = 'https://signup-2wle.onrender.com';
+    </script>
+    <script src="app.js" defer></script>
+  </body>
+</html>
+
+
+
+
