@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Crick6 - Success</title>
+    <meta name="description" content="Account created successfully." />
+    <link rel="stylesheet" href="success.css" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-crick6.png?v=3" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-crick6.png?v=3" />
+    <link rel="shortcut icon" href="/favicon-crick6.png?v=3" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon-crick6.png?v=3" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=3" />
+  </head>
+  <body>
+    <main class="stage">
+      <section class="card">
+        <div class="badge">Success</div>
+        <h1>SignUp Successful</h1>
+        <div class="meta">
+          <div>
+            <span>Username</span>
+            <code id="username">-</code>
+          </div>
+          <div>
+            <span>Password</span>
+            <code id="password">-</code>
+          </div>
+        </div>
+
+        <a id="supportLink" class="cta-box" href="https://t.me/crick6official" target="_blank" rel="noopener">
+          Welcome to CRICK6, <span id="supportName">User</span>. Contact our Customer Support for further process.
+        </a>
+
+        <div class="actions">
+          <a class="btn primary" href="https://t.me/crick6official" target="_blank" rel="noopener">Contact Crick6 Support</a>
+        </div>
+      </section>
+
+      <div class="confetti" aria-hidden="true"></div>
+    </main>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const name = params.get('name') || '';
+      const username = params.get('username') || params.get('name') || '';
+      const password = params.get('password') || params.get('pwd') || '';
+
+      const usernameEl = document.getElementById('username');
+      const passwordEl = document.getElementById('password');
+      const supportName = document.getElementById('supportName');
+
+      if (username) usernameEl.textContent = username;
+      if (password) passwordEl.textContent = password;
+      if (supportName && (username || name)) supportName.textContent = username || name;
+
+      const confetti = document.querySelector('.confetti');
+      for (let i = 0; i < 28; i++) {
+        const piece = document.createElement('span');
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.animationDelay = (Math.random() * 1.6) + 's';
+        piece.style.animationDuration = (2.2 + Math.random() * 2.2) + 's';
+        confetti.appendChild(piece);
+      }
+    </script>
+  </body>
+</html>
