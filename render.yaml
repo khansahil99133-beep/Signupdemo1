@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: softupkaran-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm run start
+    envVars:
+      - key: DATA_DIR
+        value: /var/data
+    disk:
+      name: users-data
+      mountPath: /var/data
+      sizeGB: 1
+  - type: static
+    name: softupkaran-frontend
+    env: static
+    plan: free
+    staticPublishPath: frontend/public
